@@ -24,6 +24,7 @@ public slots:
 	void sendMessage();
 
 	void read();
+    void stop();
 
 private:
 	Ui::MainWindow *ui;

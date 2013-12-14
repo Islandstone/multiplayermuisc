@@ -19,6 +19,10 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     netstate.h
 
-LIBS += -lX11
+win32 {
+}
+unix {
+   LIBS += -lX11
+}
 
 FORMS    += mainwindow.ui

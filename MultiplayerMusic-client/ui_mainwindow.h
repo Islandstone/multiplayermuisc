@@ -42,6 +42,7 @@ public:
     QHBoxLayout *horizontalLayout;
     QPushButton *connectButton;
     QPushButton *playButton;
+    QPushButton *stopButton;
     QTextEdit *textEdit;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
@@ -51,7 +52,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(400, 300);
+        MainWindow->resize(400, 346);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -100,21 +101,26 @@ public:
 
         horizontalLayout->addWidget(playButton);
 
+        stopButton = new QPushButton(centralWidget);
+        stopButton->setObjectName(QStringLiteral("stopButton"));
+
+        horizontalLayout->addWidget(stopButton);
+
 
         formLayout->setLayout(2, QFormLayout::FieldRole, horizontalLayout);
-
-
-        verticalLayout->addLayout(formLayout);
 
         textEdit = new QTextEdit(centralWidget);
         textEdit->setObjectName(QStringLiteral("textEdit"));
 
-        verticalLayout->addWidget(textEdit);
+        formLayout->setWidget(3, QFormLayout::FieldRole, textEdit);
+
+
+        verticalLayout->addLayout(formLayout);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 400, 27));
+        menuBar->setGeometry(QRect(0, 0, 400, 21));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -132,9 +138,12 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
         label->setText(QApplication::translate("MainWindow", "Server", 0));
+        serverEdit->setText(QApplication::translate("MainWindow", "dalvik.ping.uio.no", 0));
         label_2->setText(QApplication::translate("MainWindow", "Port", 0));
+        portEdit->setText(QApplication::translate("MainWindow", "9090", 0));
         connectButton->setText(QApplication::translate("MainWindow", "Connect", 0));
         playButton->setText(QApplication::translate("MainWindow", "Play", 0));
+        stopButton->setText(QApplication::translate("MainWindow", "Stop", 0));
     } // retranslateUi
 
 };
