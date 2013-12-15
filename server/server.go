@@ -195,13 +195,15 @@ func Broadcaster(c chan []byte) {
 	}
 }
 
-func ClientRecv(client *Client) {
-	buffer := make([]byte, 2048)
-	for {
-		// TODO: Protocol format
-		n, err := client.conn.Read(buffer)
+const (
+	MSG_STOP uint8 = 0
+	MSG_PLAY uint8 = 1
+)
 
-		println("Received from client:", string(buffer))
+func ClientRecv(client *Client) {
+	for {
+		header := make([]byte, 2)
+		_, err := client.conn.Read(header)
 
 		if err != nil {
 			if err == io.EOF {
@@ -210,7 +212,35 @@ func ClientRecv(client *Client) {
 			break
 		}
 
-		client.broadcast <- buffer[0:n]
+		msg_type := header[1]
+
+		println("Received message from client")
+		println(header[0])
+		println(header[1])
+
+		if msg_type == MSG_PLAY { // Play
+			println("Message type: Play")
+			msg_buf := make([]byte, 1)
+			_, err := client.conn.Read(msg_buf)
+
+			if err != nil {
+				println("Read error in play msg")
+			}
+
+			song_id := msg_buf[0]
+			println("Song id is", song_id)
+
+			broadcast_msg := make([]byte, 2)
+			broadcast_msg[0] = MSG_PLAY
+			broadcast_msg[1] = song_id
+
+			client.broadcast <- broadcast_msg
+		} else if msg_type == MSG_STOP { // Stop
+			println("Message type: Stop")
+			broadcast_msg := make([]byte, 1)
+			broadcast_msg[0] = MSG_STOP
+			client.broadcast <- broadcast_msg
+		}
 	}
 }
 
