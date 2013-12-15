@@ -200,10 +200,26 @@ const (
 	MSG_PLAY uint8 = 1
 )
 
+func ReadBytes(conn net.Conn, buffer *[]byte) (err error) {
+	var bytesRead = 0
+	for bytesRead < len(buffer) {
+		n, err := client.conn.Read(buffer[bytesRead:])
+
+		if err != nil {
+			return
+		}
+
+		bytesRead += n
+	}
+
+	return nil
+}
+
 func ClientRecv(client *Client) {
+	buffer := make([]byte, 32)
+
 	for {
-		header := make([]byte, 2)
-		_, err := client.conn.Read(header)
+		err := ReadBytes(client.conn, buffer[0:2])
 
 		if err != nil {
 			if err == io.EOF {
@@ -212,34 +228,30 @@ func ClientRecv(client *Client) {
 			break
 		}
 
-		msg_type := header[1]
+		msg_type := buffer[1]
 
 		println("Received message from client")
-		println(header[0])
-		println(header[1])
+		println(buffer[0])
+		println(buffer[1])
 
 		if msg_type == MSG_PLAY { // Play
 			println("Message type: Play")
-			msg_buf := make([]byte, 1)
-			_, err := client.conn.Read(msg_buf)
+			err := ReadBytes(client.conn, buffer[2:3])
 
 			if err != nil {
-				println("Read error in play msg")
+				if err == io.EOF {
+					client.quit <- true
+				}
+				break
 			}
 
-			song_id := msg_buf[0]
-			println("Song id is", song_id)
+			println("Song id is", buffer[2])
 
-			broadcast_msg := make([]byte, 2)
-			broadcast_msg[0] = MSG_PLAY
-			broadcast_msg[1] = song_id
-
-			client.broadcast <- broadcast_msg
+			client.broadcast <- buffer[0:3]
 		} else if msg_type == MSG_STOP { // Stop
 			println("Message type: Stop")
-			broadcast_msg := make([]byte, 1)
-			broadcast_msg[0] = MSG_STOP
-			client.broadcast <- broadcast_msg
+
+			client.broadcast <- buffer[0:2]
 		}
 	}
 }
@@ -254,7 +266,6 @@ func ClientSend(client *Client) {
 				n, err = client.conn.Write(msg[written:])
 
 				if err != nil {
-					println("Send err: ", err.Error())
 					client.quit <- true;
 					break
 				}
