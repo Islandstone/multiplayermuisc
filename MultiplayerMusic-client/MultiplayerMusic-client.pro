@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    netstate.cpp
+    netstate.cpp \
+    soundmanager.cpp
 
 HEADERS  += mainwindow.h \
-    netstate.h
+    netstate.h \
+    soundmanager.h
 
 win32 {
 }

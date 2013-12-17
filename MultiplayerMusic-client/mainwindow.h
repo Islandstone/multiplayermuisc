@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTcpSocket>
 #include <QSound>
+#include "soundmanager.h"
 
 namespace Ui {
 class MainWindow;
@@ -21,7 +22,7 @@ public:
 
 public slots:
 	void connectToServer();
-	void sendMessage();
+	void sendMessage(int id);
 
 	void read();
     void stop();
@@ -30,7 +31,8 @@ private:
 	Ui::MainWindow *ui;
 
 	QTcpSocket socket;
-	QSound *sound;
+	//QSound *sound;
+	CSoundManager *soundmgr;
 };
 
 #endif // MAINWINDOW_H

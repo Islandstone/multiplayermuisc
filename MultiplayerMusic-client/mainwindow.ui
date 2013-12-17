@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>346</height>
+    <height>395</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
     <item>
      <layout class="QFormLayout" name="formLayout">
       <property name="fieldGrowthPolicy">
-       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
       </property>
       <item row="0" column="0">
        <widget class="QLabel" name="label">
@@ -80,7 +80,14 @@
        </layout>
       </item>
       <item row="3" column="1">
-       <widget class="QTextEdit" name="textEdit"/>
+       <widget class="QTextEdit" name="textEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -92,7 +99,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>

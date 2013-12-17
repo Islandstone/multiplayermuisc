@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include "qdebug.h"
 
+#include <QDir>
+
 MainWindow* g_pWindow;
 
 #ifndef WIN32
@@ -54,7 +56,7 @@ LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam)
         KBDLLHOOKSTRUCT *kb = (KBDLLHOOKSTRUCT*)lParam;
 
         if (kb->vkCode == VK_F12) {
-            g_pWindow->sendMessage();
+			g_pWindow->sendMessage(1);
         } else if (kb->vkCode == VK_F11) {
             g_pWindow->stop();
         }
@@ -79,16 +81,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&socket, SIGNAL(readyRead()), SLOT(read()));
 
     // TODO: Error handling
-    sound = new QSound("./sound.wav");
+	//sound = new QSound("./sound.wav");
+
+	soundmgr = new CSoundManager();
 
 #ifndef WIN32
     grab_key();
+	startTimer(100);
 #else
     if (SetWindowsHookEx(WH_KEYBOARD_LL, HookProc, qWinAppInst(), NULL) == 0)
         qDebug() << "Hook failed for application instance" << qWinAppInst() << "with error:" << GetLastError();
 #endif
 
-    startTimer(100);
 }
 
 MainWindow::~MainWindow()
@@ -97,19 +101,27 @@ MainWindow::~MainWindow()
     ungrab_key();
 #endif
     delete ui;
+	delete soundmgr;
     socket.disconnectFromHost();
 }
 
 void MainWindow::read() {
-    QString str(socket.read(4));
+	QByteArray header = socket.read(2);
 
-    qDebug() << "Received: " << str;
+	quint8 len = header[0];
+	quint8 type = header[1];
 
-    if (str == "play") {
-        sound->play();
-    } else if (str == "stop") {
-        sound->stop();
-    }
+	if (type == 0) {
+		qDebug() << "Received stop message";
+		//sound->stop();
+		soundmgr->Stop();
+	} else if (type == 1) {
+		QByteArray body = socket.read(len - 2);
+		quint8 sound_id = body[0];
+
+		qDebug() << "Received message to play sound" << sound_id;
+		soundmgr->PlaySound(sound_id);
+	}
 }
 
 void MainWindow::connectToServer() {
@@ -133,16 +145,32 @@ void MainWindow::connectToServer() {
     }
 }
 
-void MainWindow::sendMessage() {
+void MainWindow::sendMessage(int id) {
     qDebug() << "sendMessage";
     if (socket.isOpen()) {
-        socket.write("play");
-    }
+		QByteArray msg;
+		msg.append((char)3);
+		msg.append((char)1);
+		msg.append((char)id);
+
+		socket.write(msg);
+	} else {
+		qDebug() << "Socket is not open";
+	}
 }
 
 void MainWindow::stop() {
-    socket.write("stop");
-    sound->stop();
+	soundmgr->Stop();
+
+	if (socket.isOpen()) {
+		QByteArray msg;
+		msg.append((char)2);
+		msg.append((char)0);
+
+		socket.write(msg);
+	} else {
+		qDebug() << "Socket is not open";
+	}
 }
 
 void MainWindow::timerEvent(QTimerEvent *) {
@@ -161,8 +189,12 @@ void MainWindow::timerEvent(QTimerEvent *) {
             qDebug() << k->keycode;
 
             if (sym == XK_F12){
-                qDebug() << "Hot key pressed!";
-            }
+				sendMessage(1);
+			} else if (sym == XK_F11) {
+				sendMessage(2);
+			} else if (sym == XK_F10) {
+				stop();
+			}
             return;
         default:
             break;
