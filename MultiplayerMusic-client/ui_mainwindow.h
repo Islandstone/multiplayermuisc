@@ -101,6 +101,7 @@ public:
 
         disconnectButton = new QPushButton(centralWidget);
         disconnectButton->setObjectName(QStringLiteral("disconnectButton"));
+        disconnectButton->setEnabled(false);
 
         horizontalLayout->addWidget(disconnectButton);
 
@@ -142,7 +143,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 400, 27));
+        menuBar->setGeometry(QRect(0, 0, 400, 21));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -158,13 +159,13 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Daletronika\342\204\242", 0));
         label->setText(QApplication::translate("MainWindow", "Server", 0));
         serverEdit->setText(QApplication::translate("MainWindow", "dalvik.ping.uio.no", 0));
         label_2->setText(QApplication::translate("MainWindow", "Port", 0));
         portEdit->setText(QApplication::translate("MainWindow", "9090", 0));
         connectButton->setText(QApplication::translate("MainWindow", "Connect", 0));
-        disconnectButton->setText(QApplication::translate("MainWindow", "PushButton", 0));
+        disconnectButton->setText(QApplication::translate("MainWindow", "Disconnect", 0));
         stopButton->setText(QApplication::translate("MainWindow", "Stop", 0));
     } // retranslateUi
 

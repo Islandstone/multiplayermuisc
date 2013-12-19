@@ -6,7 +6,7 @@
 
 QT       += core gui network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = MultiplayerMusic-client
 TEMPLATE = app
@@ -24,6 +24,8 @@ HEADERS  += mainwindow.h \
     console.h
 
 win32 {
+    INCLUDEPATH += irrKlang-1.4.0/include
+    LIBS += D:\dev\multiplayermuisc\MultiplayerMusic-client\irrKlang-1.4.0\lib\Win32-visualStudio/irrKlang.lib
 }
 unix {
    LIBS += -lX11

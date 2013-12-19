@@ -2,30 +2,31 @@
 #include <QDir>
 #include <QFileInfoList>
 #include <QDebug>
-#include <QAudioDeviceInfo>
+//#include <QAudioDeviceInfo>
 #include "soundmanager.h"
 
 #include "console.h"
 
 CSoundManager::CSoundManager()
 {
+    m_pEngine = irrklang::createIrrKlangDevice();
+
+    if (m_pEngine == NULL) {
+        qDebug() << "Failed to load sound engine!";
+        exit(0);
+    }
+
 	m_flCurrentVolume = 1.0f;
-	m_pCurrentSound = NULL;
 	LoadSounds();
 }
 
 CSoundManager::~CSoundManager() {
-	QList<QSound*> list = sounds.values();
-
-	for (int i = 0; i < list.size(); i++) {
-		QSound* sound = list.at(i);
-		delete sound;
-		list[i] = NULL;
-	}
+    m_pEngine->drop();
 }
 
 void CSoundManager::LoadSounds() {
 	QStringList filter; filter << "sound*.*";
+    Msg("Current directory: " + QDir::currentPath());
 	QDir dir(QDir::currentPath());
 	dir.setNameFilters(filter);
 	dir.setFilter(QDir::Files);
@@ -40,22 +41,20 @@ void CSoundManager::LoadSounds() {
 			int id = exp.cap(1).toInt(&ok);
 
 			if (ok) {
-				qDebug() << "Sound no." << exp.cap(1).toInt();
-
-				QSound* sound = new QSound(file.fileName());
+                irrklang::ISoundSource* sound = m_pEngine->addSoundSourceFromFile(file.fileName().toStdString().c_str());
 				sounds.insert(id, sound);
-				Msg("Loaded " + file.fileName());
-			} else {
-				qDebug() << "Invalid number in file name:" << exp.cap(0);
-				qDebug() << "Extracted from pattern:" << exp.cap(1);
-			}
-		}
-	}
+                Msg("Loaded sound: " + file.fileName());
+            }
+        }
+    }
+}
+
+void CSoundManager::SetVolume(float vol) {
+    m_pEngine->setSoundVolume(vol);
 }
 
 void CSoundManager::LowerVolume() {
 	m_flCurrentVolume = qMax(m_flCurrentVolume - 0.1f, 0.0f);
-
 }
 
 void CSoundManager::RaiseVolume() {
@@ -63,21 +62,16 @@ void CSoundManager::RaiseVolume() {
 }
 
 void CSoundManager::Stop() {
-	if (m_pCurrentSound != NULL) {
-		m_pCurrentSound->stop();
-		m_pCurrentSound = NULL;
-	}
+    m_pEngine->stopAllSounds();
 }
 
 void CSoundManager::PlaySound(int id) {
 	if (sounds.contains(id)) {
-		qDebug() << "Playing sound" << id;
-		Msg("Playing sound " + id);
+        Msg(QString("Playing sound ") + QString::number(id));
 		Stop();
-		m_pCurrentSound = sounds.value(id);
-		m_pCurrentSound->play();
+
+        m_pEngine->play2D(sounds.value(id));
 	} else {
-		qDebug() << "Invalid sound id:" << id;
-		Msg("Could not play sound, file not found " + id);
+        Msg("Could not play sound, no file loaded for id " + QString::number(id));
 	}
 }

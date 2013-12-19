@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QTcpSocket>
-#include <QSound>
+//#include <QSound>
 #include "soundmanager.h"
 
 namespace Ui {
@@ -20,6 +20,8 @@ public:
 
 	void timerEvent(QTimerEvent *);
 
+    void LowerVolume();
+    void IncreaseVolume();
 public slots:
 	void connectToServer();
 	void sendMessage(int id);
@@ -30,7 +32,8 @@ public slots:
 private slots:
 	void onConnected();
 	void onDisconnected();
-	void volumeSliderChanged(int newVolume);
+    void volumeSliderChanged(int newVolume);
+    void disconnectFromServer();
 private:
 	Ui::MainWindow *ui;
 

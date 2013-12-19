@@ -44,15 +44,20 @@ void ungrab_key() {
 }
 #else
 
+#define WINDOWS_LEAN_AND_MEAN
 #include "Windows.h"
+#undef PlaySound
 
 inline int translate_numpad(int vk) {
 	switch (vk) {
 	case VK_NUMPAD0:
+    //case VK_INSERT:
 		return 0;
 	case VK_NUMPAD1:
+    //case VK_END:
 		return 1;
 	case VK_NUMPAD2:
+    //case VK_DOWN:
 		return 2;
 	case VK_NUMPAD3:
 		return 3;
@@ -73,9 +78,11 @@ inline int translate_numpad(int vk) {
 	}
 }
 
-
 LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
+    if (nCode < 0) {
+        return CallNextHookEx(NULL, nCode, wParam, lParam);
+    }
     // process event...
     //qDebug() << nCode << wParam << lParam;
 
@@ -91,13 +98,16 @@ LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam)
 				g_pWindow->sendMessage(numpad);
 			}
 
-			return;
-		}
+            return 1;
+        }
 
 		if (kb->vkCode == VK_ADD) {
-		} else if (kb->vkCode == VK_SUBTRACT) {
-		}
-
+            g_pWindow->IncreaseVolume();
+            return 1;
+        } else if (kb->vkCode == VK_SUBTRACT) {
+            g_pWindow->LowerVolume();
+            return 1;
+        }
     }
 
     return CallNextHookEx(NULL, nCode, wParam, lParam);
@@ -117,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	Msg("Console initialized");
 
     connect(ui->connectButton, SIGNAL(clicked()), SLOT(connectToServer()));
-	//connect(ui->playButton, SIGNAL(clicked()), SLOT(sendMessage()));
+    connect(ui->disconnectButton, SIGNAL(clicked()), SLOT(disconnectFromServer()));
 
     connect(ui->stopButton, SIGNAL(clicked()), SLOT(stop()));
 
@@ -163,41 +173,50 @@ void MainWindow::read() {
 		quint8 sound_id = body[0];
 
 		qDebug() << "Received message to play sound" << sound_id;
-		soundmgr->PlaySound(sound_id);
-	}
+        soundmgr->PlaySound(sound_id);
+    }
 }
 
 void MainWindow::connectToServer() {
-    qDebug() << "Connect";
-
     QString server = ui->serverEdit->text();
 
     bool ok;
     int port = ui->portEdit->text().toInt(&ok);
 
-    if (!ok) {
-        qDebug() << "Not a port number";
-        return;
+    if (ok) {
+        socket.connectToHost(server, port);
+    } else {
+        Msg("Invalid port number");
     }
+}
 
-    socket.connectToHost(server, port);
-    socket.waitForConnected();
-
-    if (!socket.isOpen()) {
-        qDebug() << "Failed to connect to " << server << ":" << port;
-    }
+void MainWindow::disconnectFromServer() {
+    socket.disconnectFromHost();
 }
 
 void MainWindow::onConnected() {
 	Msg("Connected");
+    ui->connectButton->setEnabled(false);
+    ui->disconnectButton->setEnabled(true);
 }
 
 void MainWindow::onDisconnected() {
 	Msg("Disconnected");
+    ui->connectButton->setEnabled(true);
+    ui->disconnectButton->setEnabled(false);
+}
+
+void MainWindow::LowerVolume() {
+    ui->volumeSlider->setValue( ui->volumeSlider->value() - 10 );
+}
+
+void MainWindow::IncreaseVolume() {
+    ui->volumeSlider->setValue( ui->volumeSlider->value() + 10 );
 }
 
 void MainWindow::volumeSliderChanged(int newVolume) {
 	float volume = newVolume / 100.0f;
+    soundmgr->SetVolume(volume);
 }
 
 void MainWindow::sendMessage(int id) {
