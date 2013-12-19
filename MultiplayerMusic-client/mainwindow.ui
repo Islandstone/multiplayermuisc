@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Daletronika</class>
- <widget class="QMainWindow" name="Daletronika">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -64,9 +64,12 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="playButton">
+         <widget class="QPushButton" name="disconnectButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Play</string>
+           <string>Disconnect</string>
           </property>
          </widget>
         </item>
@@ -79,15 +82,41 @@
         </item>
        </layout>
       </item>
-      <item row="3" column="1">
-       <widget class="QTextEdit" name="textEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
+      <item row="4" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QTextEdit" name="console">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOn</enum>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="volumeSlider">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="sliderPosition">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="invertedAppearance">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>

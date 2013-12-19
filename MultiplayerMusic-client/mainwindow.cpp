@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "qdebug.h"
+#include "console.h"
 
 #include <QDir>
 
@@ -45,6 +46,32 @@ void ungrab_key() {
 
 #include "Windows.h"
 
+inline int translate_numpad(int vk) {
+	switch (vk) {
+	case VK_NUMPAD0:
+		return 0;
+	case VK_NUMPAD1:
+		return 1;
+	case VK_NUMPAD2:
+		return 2;
+	case VK_NUMPAD3:
+		return 3;
+	case VK_NUMPAD4:
+		return 4;
+	case VK_NUMPAD5:
+		return 5;
+	case VK_NUMPAD6:
+		return 6;
+	case VK_NUMPAD7:
+		return 7;
+	case VK_NUMPAD8:
+		return 8;
+	case VK_NUMPAD9:
+		return 9;
+	default:
+		return -1;
+	}
+}
 
 
 LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam)
@@ -55,11 +82,22 @@ LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam)
     if (wParam == WM_KEYUP) {
         KBDLLHOOKSTRUCT *kb = (KBDLLHOOKSTRUCT*)lParam;
 
-        if (kb->vkCode == VK_F12) {
-			g_pWindow->sendMessage(1);
-        } else if (kb->vkCode == VK_F11) {
-            g_pWindow->stop();
-        }
+		int numpad = translate_numpad(kb->vkCode);
+
+		if (numpad != -1) {
+			if (numpad == 0) {
+				g_pWindow->stop();
+			} else {
+				g_pWindow->sendMessage(numpad);
+			}
+
+			return;
+		}
+
+		if (kb->vkCode == VK_ADD) {
+		} else if (kb->vkCode == VK_SUBTRACT) {
+		}
+
     }
 
     return CallNextHookEx(NULL, nCode, wParam, lParam);
@@ -73,18 +111,23 @@ MainWindow::MainWindow(QWidget *parent) :
     g_pWindow = this;
     ui->setupUi(this);
 
+	SetConsole(ui->console);
+	ui->console->setReadOnly(true);
+
+	Msg("Console initialized");
+
     connect(ui->connectButton, SIGNAL(clicked()), SLOT(connectToServer()));
-    connect(ui->playButton, SIGNAL(clicked()), SLOT(sendMessage()));
+	//connect(ui->playButton, SIGNAL(clicked()), SLOT(sendMessage()));
 
     connect(ui->stopButton, SIGNAL(clicked()), SLOT(stop()));
 
+	connect(&socket, SIGNAL(connected()), SLOT(onConnected()));
+	connect(&socket, SIGNAL(disconnected()), SLOT(onDisconnected()));
     connect(&socket, SIGNAL(readyRead()), SLOT(read()));
-
-    // TODO: Error handling
-	//sound = new QSound("./sound.wav");
 
 	soundmgr = new CSoundManager();
 
+	connect(ui->volumeSlider, SIGNAL(valueChanged(int)), SLOT(volumeSliderChanged(int)));
 #ifndef WIN32
     grab_key();
 	startTimer(100);
@@ -143,6 +186,18 @@ void MainWindow::connectToServer() {
     if (!socket.isOpen()) {
         qDebug() << "Failed to connect to " << server << ":" << port;
     }
+}
+
+void MainWindow::onConnected() {
+	Msg("Connected");
+}
+
+void MainWindow::onDisconnected() {
+	Msg("Disconnected");
+}
+
+void MainWindow::volumeSliderChanged(int newVolume) {
+	float volume = newVolume / 100.0f;
 }
 
 void MainWindow::sendMessage(int id) {

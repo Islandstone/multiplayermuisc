@@ -27,6 +27,10 @@ public slots:
 	void read();
     void stop();
 
+private slots:
+	void onConnected();
+	void onDisconnected();
+	void volumeSliderChanged(int newVolume);
 private:
 	Ui::MainWindow *ui;
 

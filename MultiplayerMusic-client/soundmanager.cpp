@@ -2,10 +2,14 @@
 #include <QDir>
 #include <QFileInfoList>
 #include <QDebug>
+#include <QAudioDeviceInfo>
 #include "soundmanager.h"
+
+#include "console.h"
 
 CSoundManager::CSoundManager()
 {
+	m_flCurrentVolume = 1.0f;
 	m_pCurrentSound = NULL;
 	LoadSounds();
 }
@@ -40,12 +44,22 @@ void CSoundManager::LoadSounds() {
 
 				QSound* sound = new QSound(file.fileName());
 				sounds.insert(id, sound);
+				Msg("Loaded " + file.fileName());
 			} else {
 				qDebug() << "Invalid number in file name:" << exp.cap(0);
 				qDebug() << "Extracted from pattern:" << exp.cap(1);
 			}
 		}
 	}
+}
+
+void CSoundManager::LowerVolume() {
+	m_flCurrentVolume = qMax(m_flCurrentVolume - 0.1f, 0.0f);
+
+}
+
+void CSoundManager::RaiseVolume() {
+	m_flCurrentVolume = qMin(m_flCurrentVolume + 0.1f, 1.0f);
 }
 
 void CSoundManager::Stop() {
@@ -58,10 +72,12 @@ void CSoundManager::Stop() {
 void CSoundManager::PlaySound(int id) {
 	if (sounds.contains(id)) {
 		qDebug() << "Playing sound" << id;
+		Msg("Playing sound " + id);
 		Stop();
 		m_pCurrentSound = sounds.value(id);
 		m_pCurrentSound->play();
 	} else {
 		qDebug() << "Invalid sound id:" << id;
+		Msg("Could not play sound, file not found " + id);
 	}
 }

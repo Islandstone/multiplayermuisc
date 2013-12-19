@@ -21,6 +21,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QToolBar>
@@ -41,9 +42,11 @@ public:
     QLineEdit *portEdit;
     QHBoxLayout *horizontalLayout;
     QPushButton *connectButton;
-    QPushButton *playButton;
+    QPushButton *disconnectButton;
     QPushButton *stopButton;
-    QTextEdit *textEdit;
+    QHBoxLayout *horizontalLayout_2;
+    QTextEdit *console;
+    QSlider *volumeSlider;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -52,7 +55,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(400, 346);
+        MainWindow->resize(400, 395);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -67,7 +70,7 @@ public:
         formLayout = new QFormLayout();
         formLayout->setSpacing(6);
         formLayout->setObjectName(QStringLiteral("formLayout"));
-        formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+        formLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
         label = new QLabel(centralWidget);
         label->setObjectName(QStringLiteral("label"));
 
@@ -96,10 +99,10 @@ public:
 
         horizontalLayout->addWidget(connectButton);
 
-        playButton = new QPushButton(centralWidget);
-        playButton->setObjectName(QStringLiteral("playButton"));
+        disconnectButton = new QPushButton(centralWidget);
+        disconnectButton->setObjectName(QStringLiteral("disconnectButton"));
 
-        horizontalLayout->addWidget(playButton);
+        horizontalLayout->addWidget(disconnectButton);
 
         stopButton = new QPushButton(centralWidget);
         stopButton->setObjectName(QStringLiteral("stopButton"));
@@ -109,10 +112,29 @@ public:
 
         formLayout->setLayout(2, QFormLayout::FieldRole, horizontalLayout);
 
-        textEdit = new QTextEdit(centralWidget);
-        textEdit->setObjectName(QStringLiteral("textEdit"));
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setSpacing(6);
+        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        console = new QTextEdit(centralWidget);
+        console->setObjectName(QStringLiteral("console"));
+        console->setEnabled(true);
+        console->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+        console->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        console->setReadOnly(true);
 
-        formLayout->setWidget(3, QFormLayout::FieldRole, textEdit);
+        horizontalLayout_2->addWidget(console);
+
+        volumeSlider = new QSlider(centralWidget);
+        volumeSlider->setObjectName(QStringLiteral("volumeSlider"));
+        volumeSlider->setMaximum(100);
+        volumeSlider->setSliderPosition(100);
+        volumeSlider->setOrientation(Qt::Vertical);
+        volumeSlider->setInvertedAppearance(false);
+
+        horizontalLayout_2->addWidget(volumeSlider);
+
+
+        formLayout->setLayout(4, QFormLayout::FieldRole, horizontalLayout_2);
 
 
         verticalLayout->addLayout(formLayout);
@@ -120,7 +142,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 400, 21));
+        menuBar->setGeometry(QRect(0, 0, 400, 27));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -142,7 +164,7 @@ public:
         label_2->setText(QApplication::translate("MainWindow", "Port", 0));
         portEdit->setText(QApplication::translate("MainWindow", "9090", 0));
         connectButton->setText(QApplication::translate("MainWindow", "Connect", 0));
-        playButton->setText(QApplication::translate("MainWindow", "Play", 0));
+        disconnectButton->setText(QApplication::translate("MainWindow", "PushButton", 0));
         stopButton->setText(QApplication::translate("MainWindow", "Stop", 0));
     } // retranslateUi
 
